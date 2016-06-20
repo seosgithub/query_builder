@@ -1,7 +1,17 @@
 package query_builder
 
+type IQueryMixin interface {
+	GetQueryMixin() *QueryMixin
+}
+
 type QueryMixin struct {
 	*QueryBuilder
+
+	IQueryMixin
+}
+
+func (q *QueryMixin) GetQueryMixin() *QueryMixin {
+	return q
 }
 
 type QueryBuilder struct {
@@ -17,12 +27,12 @@ func (qb *QueryBuilder) Push(query interface{}) {
 
 type QueryRunner func(queries []interface{}) ([]interface{}, error)
 
-func (qb *QueryBuilder) Init(queryRunner QueryRunner, mixins ...*QueryMixin) {
+func (qb *QueryBuilder) Init(queryRunner QueryRunner, mixins ...IQueryMixin) {
 	qb.queries = []interface{}{}
 	qb.QueryRunner = queryRunner
 
 	for _, mixin := range mixins {
-		mixin.QueryBuilder = qb
+		mixin.GetQueryMixin().QueryBuilder = qb
 	}
 }
 
